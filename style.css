@@ -33,3 +33,6 @@ section:has(> .collapsible-title > .collapse-toggle[aria-expanded="false"])+sect
 
 /* Offset anchor jumps for sticky navigation */
 #badges,#results,#players,#types{scroll-margin-top:95px}
+
+/* Tighter hero/banner */
+.hero{height:390px}.hero-copy{padding-top:25px;padding-bottom:25px}.crest{width:165px;height:165px}h1{font-size:72px}.season{margin-top:18px}@media(max-width:700px){.hero{height:350px}.hero-copy{padding-bottom:55px}.crest{width:82px;height:82px}h1{font-size:45px}}
