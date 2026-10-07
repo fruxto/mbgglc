@@ -29,6 +29,10 @@ function prettyDate(v){
 
 function render(results,isDemo=false){
   const normalized=results.map((r,i)=>({...r,_i:i,type:TYPES.find(t=>t.toLowerCase()===String(r.type).toLowerCase())||r.type}));
+  const dated=normalized.filter(r=>r.date).map(r=>({raw:r.date,d:new Date(r.date+(/T/.test(r.date)?"":"T12:00:00"))})).filter(x=>!isNaN(x.d));
+  const latest=dated.sort((a,b)=>b.d-a.d)[0];
+  const lastUpdated=document.querySelector("#lastUpdated");
+  if(lastUpdated) lastUpdated.textContent=latest?`Last updated ${latest.d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}`:"";
   const playerMap=new Map();
   normalized.forEach(r=>{
     if(!playerMap.has(r.player)) playerMap.set(r.player,{name:r.player,badges:new Map()});
