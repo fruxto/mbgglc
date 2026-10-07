@@ -47,8 +47,6 @@ function render(results,isDemo=false){
   const counts=TYPES.map(type=>({type,count:normalized.filter(r=>r.type===type).length})).filter(x=>x.count).sort((a,b)=>b.count-a.count||TYPES.indexOf(a.type)-TYPES.indexOf(b.type));
   document.querySelector('#typeRecords').innerHTML=counts.length?counts.map((r,i)=>`<div class="record"><b>${i+1}</b><span><strong>${esc(r.type)}</strong><small>winning deck${r.count===1?'':'s'}</small></span><em>${r.count}</em></div>`).join(''):`<p class="empty">No winning types yet.</p>`;
 
-  const note=document.querySelector('#dataStatus');
-  note.textContent=isDemo?'Preview data — connect the Google Sheet to go live.':'Live from the MBG GLC results sheet.';
 }
 
 async function start(){
@@ -59,7 +57,9 @@ async function start(){
     render(parseCSV(await res.text()),false);
   }catch(e){
     console.error(e); render(DEMO_RESULTS,true);
-    document.querySelector('#dataStatus').textContent='Could not load the live sheet — showing preview data.';
   }
 }
 start();
+
+
+document.querySelectorAll('.collapsible-title').forEach(title=>{const btn=title.querySelector('.collapse-toggle');const content=title.nextElementSibling;if(!btn||!content?.classList.contains('collapsible-content'))return;const toggle=()=>{const open=btn.getAttribute('aria-expanded')==='true';btn.setAttribute('aria-expanded',String(!open));content.classList.toggle('collapsed',open);};btn.addEventListener('click',e=>{e.stopPropagation();toggle()});title.addEventListener('click',e=>{if(!e.target.closest('button'))toggle()});});
