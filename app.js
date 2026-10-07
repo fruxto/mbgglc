@@ -56,7 +56,11 @@ function render(results,isDemo=false){
   const recent=[...normalized].reverse().slice(0,8);
   document.querySelector('#resultCards').innerHTML=recent.length?recent.map(r=>`<article class="result-card"><div class="type-bar ${slug(r.type)}"></div><p class="date">${esc(prettyDate(r.date))}</p><h3>${esc(r.player)}</h3><p><b>${esc(r.type)}</b>${r.deck?` · ${esc(r.deck)}`:''}</p>${r.deckUrl&&r.deckUrl!=='#'?`<a href="${esc(r.deckUrl)}" target="_blank" rel="noopener">VIEW DECKLIST →</a>`:''}</article>`).join(''):`<p class="empty">No results yet.</p>`;
 
-  document.querySelector('#playerRecords').innerHTML=players.length?players.map((p,i)=>`<div class="record"><b>${i+1}</b><span><strong>${esc(p.name)}</strong><small>${requiredCount(p)===10?'GLC COMPLETE!':`${10-requiredCount(p)} badges remaining`}</small></span><em>${requiredCount(p)}/10</em></div>`).join(''):`<p class="empty">No badge winners yet.</p>`;
+  document.querySelector('#playerRecords').innerHTML=players.length?players.map((p,i)=>`<div class="record"><b>${i+1}</b><span><strong>${esc(p.name)}</strong></span><em>${requiredCount(p)}/10</em></div>`).join(''):`<p class="empty">No badge winners yet.</p>`;
+
+  const champions=players.filter(p=>requiredCount(p)===10).map(p=>{const requiredWins=[...p.badges.values()].filter(w=>w.type!=="Fairy").sort((a,b)=>(parseDate(a.date)?.getTime()||0)-(parseDate(b.date)?.getTime()||0)||a._i-b._i);const completed=requiredWins[requiredWins.length-1];return {...p,requiredWins,completedAt:parseDate(completed?.date)?.getTime()||0,completedIndex:completed?completed._i:0};}).sort((a,b)=>a.completedAt-b.completedAt||a.completedIndex-b.completedIndex);
+  const championsSection=document.querySelector('#champions');
+  if(championsSection){championsSection.hidden=!champions.length;document.querySelector('#championRecords').innerHTML=champions.map((p,i)=>`<div class="champion-record"><b>${i+1}${i===0?'st':i===1?'nd':i===2?'rd':'th'}</b><strong>${esc(p.name)}</strong><span>${p.requiredWins.map(w=>esc(w.deck||w.type)).join(' → ')}</span></div>`).join('');}
 
   document.querySelectorAll('.player-name').forEach(btn=>btn.addEventListener('click',()=>{
     const p=playerMap.get(btn.dataset.player);
@@ -67,7 +71,7 @@ function render(results,isDemo=false){
     dialog.showModal();
   }));
   const counts=TYPES.map(type=>({type,count:normalized.filter(r=>r.type===type).length})).filter(x=>x.count).sort((a,b)=>b.count-a.count||TYPES.indexOf(a.type)-TYPES.indexOf(b.type));
-  document.querySelector('#typeRecords').innerHTML=counts.length?counts.map((r,i)=>`<div class="record"><b>${i+1}</b><span><strong>${esc(r.type)}</strong><small>winning deck${r.count===1?'':'s'}</small></span><em>${r.count}</em></div>`).join(''):`<p class="empty">No winning types yet.</p>`;
+  document.querySelector('#typeRecords').innerHTML=counts.length?counts.map((r,i)=>`<div class="record"><b>${i+1}</b><span><strong>${esc(r.type)}</strong></span><em>${r.count}</em></div>`).join(''):`<p class="empty">No winning types yet.</p>`;
 
 }
 
