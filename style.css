@@ -30,3 +30,6 @@ section:has(> .collapsible-title > .collapse-toggle[aria-expanded="false"])+sect
 .collapse-toggle{color:var(--gold)!important;font:800 18px 'Barlow Condensed'!important;letter-spacing:-3px!important;padding-right:5px!important}.collapse-toggle:hover{color:#ffd34e!important}.collapsible-title .collapse-toggle[aria-expanded="true"]{transform:rotate(90deg)!important}.collapsible-title .collapse-toggle[aria-expanded="false"]{transform:none!important}
 
 .champions{margin-top:80px;padding-top:70px;border-top:1px solid var(--line)}.champions h2{font-size:46px}.champion-list{margin-top:25px;border-top:1px solid var(--line)}.champion-record{display:grid;grid-template-columns:55px 160px 1fr;gap:15px;align-items:start;padding:18px 5px;border-bottom:1px solid var(--line)}.champion-record>b{font:800 18px 'Barlow Condensed';color:var(--gold)}.champion-record>strong{font:700 19px 'Barlow Condensed'}.champion-record>span{color:#9da2a2;font-size:13px;line-height:1.6}@media(max-width:700px){.champion-record{grid-template-columns:45px 1fr}.champion-record>span{grid-column:2}.champions h2{font-size:38px}}
+
+/* Offset anchor jumps for sticky navigation */
+#badges,#results,#players,#types{scroll-margin-top:95px}
