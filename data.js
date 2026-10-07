@@ -3,7 +3,7 @@
 // Expected columns: Date, Player, Badge / Type, Deck Name, Decklist URL
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRkIKtrbJbYz0JkQLnozeXyccnjmEarKQpnWmx9nxkwCSo4HjNj1qsJ8oUMfxsbiDHFJx1QlWTDWoEY/pub?gid=1892256709&single=true&output=csv";
 
-const TYPES=["Grass","Fire","Water","Lightning","Psychic","Fighting","Darkness","Metal","Dragon","Colorless","Fairy"];
+const TYPES=["Grass","Fire","Water","Lightning","Psychic","Fighting","Darkness","Metal","Dragon","Colorless"];
 
 // Shown only until SHEET_CSV_URL is configured.
 const DEMO_RESULTS=[
