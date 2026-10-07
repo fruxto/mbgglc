@@ -93,3 +93,27 @@ document.querySelectorAll('.collapsible-title').forEach(title=>{const btn=title.
 
 const playerDialog=document.querySelector('#playerDialog');
 if(playerDialog){playerDialog.querySelector('.dialog-close').addEventListener('click',()=>playerDialog.close());playerDialog.addEventListener('click',e=>{if(e.target===playerDialog)playerDialog.close()});}
+
+function getGLCDates(count=4){
+  const seasonStart=new Date(2026,10,14,12), seasonEnd=new Date(2027,11,31,12);
+  const today=new Date(); today.setHours(0,0,0,0);
+  const from=today>seasonStart?today:seasonStart, dates=[];
+  for(let y=from.getFullYear();y<=seasonEnd.getFullYear()&&dates.length<count;y++){
+    const firstMonth=y===from.getFullYear()?from.getMonth():0;
+    const lastMonth=y===seasonEnd.getFullYear()?seasonEnd.getMonth():11;
+    for(let m=firstMonth;m<=lastMonth&&dates.length<count;m++){
+      const first=new Date(y,m,1,12);
+      const firstSat=1+((6-first.getDay()+7)%7);
+      for(const day of [firstSat+7,firstSat+21]){
+        const d=new Date(y,m,day,12);
+        if(d>=from&&d>=seasonStart&&d<=seasonEnd) dates.push(d);
+      }
+    }
+  }
+  return dates;
+}
+const eventCards=document.querySelector('#eventCards');
+if(eventCards){
+  const dates=getGLCDates();
+  eventCards.innerHTML=dates.length?dates.map((d,i)=>`<article class="event-card"><p class="eyebrow gold">${i===0?'NEXT EVENT':'UPCOMING'}</p><div class="event-date"><strong>${d.toLocaleDateString('en-US',{day:'numeric'})}</strong><span>${d.toLocaleDateString('en-US',{month:'short'}).toUpperCase()}<small>${d.getFullYear()}</small></span></div><p>Saturday · 4:00 PM*</p></article>`).join(''):`<p class="empty">Season 1 has concluded.</p>`;
+}
