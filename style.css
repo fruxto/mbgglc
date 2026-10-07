@@ -25,3 +25,6 @@ footer .contact{margin:8px 0 0;color:#8d9292;font:600 12px Inter,Arial,sans-seri
 section:has(> .collapsible-title > .collapse-toggle[aria-expanded="false"]){padding-bottom:0!important;min-height:0!important}
 section:has(> .collapsible-title > .collapse-toggle[aria-expanded="false"])>.collapsible-title{margin-top:38px!important;margin-bottom:18px!important;align-items:center}
 section:has(> .collapsible-title > .collapse-toggle[aria-expanded="false"])+section{margin-top:0!important}
+
+/* Yellow double-chevron collapse indicator */
+.collapse-toggle{color:var(--gold)!important;font:800 18px 'Barlow Condensed'!important;letter-spacing:-3px!important;padding-right:5px!important}.collapse-toggle:hover{color:#ffd34e!important}.collapsible-title .collapse-toggle[aria-expanded="true"]{transform:rotate(90deg)!important}.collapsible-title .collapse-toggle[aria-expanded="false"]{transform:none!important}
