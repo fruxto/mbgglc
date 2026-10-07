@@ -58,18 +58,19 @@ function render(results,isDemo=false){
 
   document.querySelector('#playerRecords').innerHTML=players.length?players.map((p,i)=>`<div class="record"><b>${i+1}</b><span><strong>${esc(p.name)}</strong></span><em>${requiredCount(p)}/10</em></div>`).join(''):`<p class="empty">No badge winners yet.</p>`;
 
-  const champions=players.filter(p=>requiredCount(p)===10).map(p=>{const requiredWins=[...p.badges.values()].filter(w=>w.type!=="Fairy").sort((a,b)=>(parseDate(a.date)?.getTime()||0)-(parseDate(b.date)?.getTime()||0)||a._i-b._i);const completed=requiredWins[requiredWins.length-1];return {...p,requiredWins,completedAt:parseDate(completed?.date)?.getTime()||0,completedIndex:completed?completed._i:0};}).sort((a,b)=>a.completedAt-b.completedAt||a.completedIndex-b.completedIndex);
+  const requiredTypes=TYPES.filter(t=>t!=="Fairy");
+  const champions=players.map(p=>{
+    const firstWins=new Map();
+    [...p.wins].sort((a,b)=>(parseDate(a.date)?.getTime()||0)-(parseDate(b.date)?.getTime()||0)||a._i-b._i).forEach(w=>{
+      if(requiredTypes.includes(w.type)&&!firstWins.has(w.type)) firstWins.set(w.type,w);
+    });
+    if(firstWins.size!==requiredTypes.length) return null;
+    const requiredWins=[...firstWins.values()].sort((a,b)=>(parseDate(a.date)?.getTime()||0)-(parseDate(b.date)?.getTime()||0)||a._i-b._i);
+    const completed=requiredWins[requiredWins.length-1];
+    return {...p,requiredWins,completedAt:parseDate(completed.date)?.getTime()||0,completedIndex:completed._i};
+  }).filter(Boolean).sort((a,b)=>a.completedAt-b.completedAt||a.completedIndex-b.completedIndex);
   const championsSection=document.querySelector('#champions');
-  if(championsSection){championsSection.hidden=!champions.length;document.querySelector('#championRecords').innerHTML=champions.map((p,i)=>`<div class="champion-record"><b>${i+1}${i===0?'st':i===1?'nd':i===2?'rd':'th'}</b><strong>${esc(p.name)}</strong><span>${p.requiredWins.map(w=>esc(w.deck||w.type)).join(' → ')}</span></div>`).join('');}
-
-  document.querySelectorAll('.player-name').forEach(btn=>btn.addEventListener('click',()=>{
-    const p=playerMap.get(btn.dataset.player);
-    if(!p) return;
-    const wins=[...p.wins].sort((a,b)=>(parseDate(b.date)?.getTime()||0)-(parseDate(a.date)?.getTime()||0));
-    const dialog=document.querySelector('#playerDialog');
-    document.querySelector('#playerDialogContent').innerHTML=`<p class="eyebrow gold">TRAINER HISTORY</p><h2 id="playerDialogTitle">${esc(p.name)}</h2><p class="player-summary">${requiredCount(p)} of 10 required badges${p.badges.has('Fairy')?' + Fairy':''}</p><div class="player-wins">${wins.map(w=>`<div class="player-win"><span class="badge ${slug(w.type)} earned">◆</span><div><strong>${esc(w.type)} Badge</strong><small>${esc(prettyDate(w.date))}${w.deck?` · ${esc(w.deck)}`:''}</small></div>${w.deckUrl&&w.deckUrl!=='#'?`<a href="${esc(w.deckUrl)}" target="_blank" rel="noopener">VIEW DECKLIST →</a>`:''}</div>`).join('')}</div>`;
-    dialog.showModal();
-  }));
+  if(championsSection){championsSection.hidden=!champions.length;document.querySelector('#championRecords').innerHTML=champions.map((p,i)=>`<div class="champion-record"><b>${i+1}${i===0?'st':i===1?'nd':i===2?'rd':'th'}</b><strong>${esc(p.name)}</strong><span>${p.requiredWins.map(w=>esc(w.type)).join(' → ')}</span></div>`).join('');}
   const counts=TYPES.map(type=>({type,count:normalized.filter(r=>r.type===type).length})).filter(x=>x.count).sort((a,b)=>b.count-a.count||TYPES.indexOf(a.type)-TYPES.indexOf(b.type));
   document.querySelector('#typeRecords').innerHTML=counts.length?counts.map((r,i)=>`<div class="record"><b>${i+1}</b><span><strong>${esc(r.type)}</strong></span><em>${r.count}</em></div>`).join(''):`<p class="empty">No winning types yet.</p>`;
 
