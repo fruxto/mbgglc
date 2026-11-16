@@ -53,3 +53,6 @@ section:has(> .collapsible-title > .collapse-toggle[aria-expanded="false"])+sect
 
 /* Compact the banner around its logo and title. */
 .hero{height:280px}.hero-copy{padding-top:20px;padding-bottom:20px}@media(max-width:700px){.hero{height:290px}.hero-copy{padding-top:22px;padding-bottom:65px}}
+
+/* Keep the Badge Board close to its neighboring sections. */
+.events{padding-bottom:28px}#badges>.section-title{margin-top:28px}.league-info{margin-top:28px}.league-info>.section-title{margin-top:0}
