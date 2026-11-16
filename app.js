@@ -17,8 +17,8 @@ function parseCSV(text){
   if(rows.length<2) return [];
   const h=rows[0].map(x=>x.trim().toLowerCase());
   const find=(...names)=>names.map(n=>h.indexOf(n)).find(i=>i>=0) ?? -1;
-  const ix={date:find('date'),player:find('player'),type:find('badge / type','badge/type','badge','type'),deck:find('deck name','deck'),url:find('decklist url','decklist','deck url')};
-  return rows.slice(1).map(r=>({date:r[ix.date]?.trim(),player:r[ix.player]?.trim(),type:r[ix.type]?.trim(),deck:r[ix.deck]?.trim(),deckUrl:r[ix.url]?.trim()})).filter(r=>r.player&&r.type);
+  const ix={date:find('date'),player:find('player'),type:find('badge / type','badge/type','badge','type'),deck:find('deck name','deck'),url:find('decklist url','decklist','deck url'),photo:find('deck photo url','decklist photo url','photo url')};
+  return rows.slice(1).map(r=>({date:r[ix.date]?.trim(),player:r[ix.player]?.trim(),type:r[ix.type]?.trim(),deck:r[ix.deck]?.trim(),deckUrl:r[ix.url]?.trim(),photoUrl:r[ix.photo]?.trim()})).filter(r=>r.player&&r.type);
 }
 
 function parseDate(v){
@@ -31,6 +31,7 @@ function parseDate(v){
   const d=new Date(s);
   return isNaN(d)?null:d;
 }
+function safePhotoUrl(v){try{const u=new URL(v,location.href);return ['https:','http:'].includes(u.protocol)?u.href:'';}catch{return '';}}
 function prettyDate(v){
   const d=parseDate(v);
   return d?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}).toUpperCase():String(v||'');
@@ -54,8 +55,14 @@ function render(results,isDemo=false){
   document.querySelector('#badgeRows').innerHTML=players.length?players.map(p=>`<tr><td><button class="player-name" type="button" data-player="${esc(p.name)}">${esc(p.name)}</button></td>${TYPES.map(t=>{const win=p.badges.get(t); const inner=`<span class="badge ${slug(t)} ${win?'earned':''}" title="${esc(t)}">${win?'◆':'◇'}</span>`; return `<td>${win&&win.deckUrl&&win.deckUrl!=='#'?`<a class="badge-link" href="${esc(win.deckUrl)}" target="_blank" rel="noopener">${inner}</a>`:inner}</td>`}).join('')}<td class="total">${requiredCount(p)}/10</td></tr>`).join(''):`<tr><td colspan="13" class="empty">No badge winners yet — Season 1 starts November 14!</td></tr>`;
 
   const recent=[...normalized].reverse().slice(0,4);
-  document.querySelector('#resultCards').innerHTML=recent.length?recent.map(r=>`<article class="result-card"><div class="type-bar ${slug(r.type)}"></div><p class="date">${esc(prettyDate(r.date))}</p><h3>${esc(r.player)}</h3><p><b>${esc(r.type)}</b>${r.deck?` · ${esc(r.deck)}`:''}</p>${r.deckUrl&&r.deckUrl!=='#'?`<a href="${esc(r.deckUrl)}" target="_blank" rel="noopener">VIEW DECKLIST →</a>`:''}</article>`).join(''):`<p class="empty">No results yet.</p>`;
+  document.querySelector('#resultCards').innerHTML=recent.length?recent.map(r=>`<article class="result-card"><div class="type-bar ${slug(r.type)}"></div><p class="date">${esc(prettyDate(r.date))}</p>${safePhotoUrl(r.photoUrl)?`<a class="deck-photo-link" href="${esc(safePhotoUrl(r.photoUrl))}" target="_blank" rel="noopener" aria-label="View deck photo for ${esc(r.player)}"><img class="deck-photo" src="${esc(safePhotoUrl(r.photoUrl))}" loading="lazy" alt="${esc(r.player)} winning ${esc(r.type)} deck photo"></a>`:""}<h3>${esc(r.player)}</h3><p><b>${esc(r.type)}</b>${r.deck?` · ${esc(r.deck)}`:''}</p>${r.deckUrl&&r.deckUrl!=='#'?`<a href="${esc(r.deckUrl)}" target="_blank" rel="noopener">VIEW DECKLIST →</a>`:''}${safePhotoUrl(r.photoUrl)?`<a class="photo-text-link" href="${esc(safePhotoUrl(r.photoUrl))}" target="_blank" rel="noopener">VIEW DECK PHOTO →</a>`:""}</article>`).join(''):`<p class="empty">No results yet.</p>`;
 
+  document.querySelectorAll('.player-name').forEach(btn=>btn.addEventListener('click',()=>{
+    const p=playerMap.get(btn.dataset.player);if(!p)return;
+    const wins=[...p.wins].sort((a,b)=>(parseDate(b.date)?.getTime()||0)-(parseDate(a.date)?.getTime()||0)||b._i-a._i);
+    document.querySelector('#playerDialogContent').innerHTML=`<p class="eyebrow gold">TRAINER HISTORY</p><h2 id="playerDialogTitle">${esc(p.name)}</h2><p class="player-summary">${requiredCount(p)}/10 required badges</p><div class="player-wins">${wins.map(w=>`<div class="player-win"><span class="badge ${slug(w.type)} earned">◆</span><div><strong>${esc(w.type)} Badge</strong><small>${esc(prettyDate(w.date))}${w.deck?` · ${esc(w.deck)}`:''}</small></div><div class="win-links">${w.deckUrl&&w.deckUrl!=='#'?`<a href="${esc(w.deckUrl)}" target="_blank" rel="noopener">DECKLIST →</a>`:''}${safePhotoUrl(w.photoUrl)?`<a href="${esc(safePhotoUrl(w.photoUrl))}" target="_blank" rel="noopener">DECK PHOTO →</a>`:''}</div></div>`).join('')}</div>`;
+    document.querySelector('#playerDialog').showModal();
+  }));
   document.querySelector('#playerRecords').innerHTML=players.length?players.map((p,i)=>`<div class="record"><b>${i+1}</b><span><strong>${esc(p.name)}</strong></span><em>${requiredCount(p)}/10</em></div>`).join(''):`<p class="empty">No badge winners yet.</p>`;
 
   const requiredTypes=TYPES.filter(t=>t!=="Fairy");
