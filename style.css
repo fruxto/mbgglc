@@ -59,3 +59,18 @@ section:has(> .collapsible-title > .collapse-toggle[aria-expanded="false"])+sect
 
 /* Match the compact spacing before standings and type statistics. */
 .split{margin-top:28px;padding-top:28px}
+
+/* Consistent compact vertical rhythm across the full page. */
+main{padding-top:32px;padding-bottom:28px}
+main>section{margin-top:28px}
+main>section:first-child{margin-top:0}
+main .section-title,#badges>.section-title,.league-info>.section-title{margin-top:0;margin-bottom:20px}
+.league-info,.resources{margin-top:28px;padding-top:0}
+.events,.intro{padding-bottom:28px}
+.split,.champions{margin-top:28px;padding-top:28px}
+.split{gap:32px}
+.record-list,.champion-list{margin-top:20px}
+section:has(> .collapsible-title > .collapse-toggle[aria-expanded="false"])>.collapsible-title{margin-top:0!important;margin-bottom:0!important}
+section:has(> .collapsible-title > .collapse-toggle[aria-expanded="false"])+section{margin-top:28px!important}
+footer{margin-top:0;height:auto;min-height:100px;padding:24px 18px}
+@media(max-width:700px){main{padding-top:28px;padding-bottom:28px}.split{gap:28px}}
