@@ -31,7 +31,7 @@ function parseDate(v){
   const d=new Date(s);
   return isNaN(d)?null:d;
 }
-function safePhotoUrl(v){try{const u=new URL(v,location.href);return ['https:','http:'].includes(u.protocol)?u.href:'';}catch{return '';}}
+function safePhotoUrl(v){if(!v||v==='#')return '';try{const u=new URL(v,location.href);return ['https:','http:'].includes(u.protocol)?u.href:'';}catch{return '';}}
 function prettyDate(v){
   const d=parseDate(v);
   return d?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}).toUpperCase():String(v||'');
