@@ -43,3 +43,5 @@ section:has(> .collapsible-title > .collapse-toggle[aria-expanded="false"])+sect
 .event-note{color:#b8bcbc!important;font-size:13px!important;font-weight:600;line-height:1.5;margin-top:14px!important}
 
 .result-card .deck-photo-link{display:block;margin-top:16px}.deck-photo-link img{width:100%;max-height:200px;object-fit:cover;border:1px solid var(--line);display:block;margin-bottom:10px}.deck-photo-link:hover img{border-color:var(--gold)}
+
+.meta-row{display:grid;grid-template-columns:100px 1fr 85px;gap:16px;align-items:center;margin:18px 0}.meta-row meter{width:100%;accent-color:var(--gold)}#attendance select{padding:10px;background:var(--panel);color:var(--text);border:1px solid var(--line)}#popularTypes{margin-top:32px}.deck-photo-link img{object-fit:contain!important;background:#101213}

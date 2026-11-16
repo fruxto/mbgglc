@@ -10,3 +10,5 @@ const DEMO_RESULTS=[
  {date:"2026-11-28",player:"Alex Trainer",type:"Dragon",deck:"Dragon Box",deckUrl:"#"},
  {date:"2026-11-14",player:"Jordan Trainer",type:"Fire",deck:"Fire Toolbox",deckUrl:"#"}
 ];
+
+const PLAYERS_CSV_URL="https://docs.google.com/spreadsheets/d/1BmWCqkW7tA8neEal-AMZUbAB7w4Y8tBcOeqhh6VU7NE/gviz/tq?tqx=out:csv&sheet=Players&range=E1:G1000";
