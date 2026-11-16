@@ -78,8 +78,7 @@ function render(results,isDemo=false){
   }).filter(Boolean).sort((a,b)=>a.completedAt-b.completedAt||a.completedIndex-b.completedIndex);
   const championsSection=document.querySelector('#champions');
   if(championsSection){championsSection.hidden=!champions.length;document.querySelector('#championRecords').innerHTML=champions.map((p,i)=>`<div class="champion-record"><b>${i+1}${i===0?'st':i===1?'nd':i===2?'rd':'th'}</b><strong>${esc(p.name)}</strong><span>${p.requiredWins.map(w=>esc(w.type)).join(' → ')}</span></div>`).join('');}
-  const counts=TYPES.map(type=>({type,count:normalized.filter(r=>r.type===type).length})).filter(x=>x.count).sort((a,b)=>b.count-a.count||TYPES.indexOf(a.type)-TYPES.indexOf(b.type));
-  document.querySelector('#typeRecords').innerHTML=counts.length?counts.map((r,i)=>`<div class="record"><b>${i+1}</b><span><strong>${esc(r.type)}</strong></span><em>${r.count}</em></div>`).join(''):`<p class="empty">No winning types yet.</p>`;
+
 
 }
 
@@ -126,26 +125,36 @@ if(eventCards){
 }
 
 
+
+const META_TYPES=['Dragon','Electric','Colorless','Water','Fire','Psychic','Dark','Grass','Fighting','Metal','Fairy'];
+function metaType(value){
+  const name=String(value||'').trim().toLowerCase();
+  if(name==='lightning'||name==='electric')return 'Electric';
+  if(name==='darkness'||name==='dark')return 'Dark';
+  return META_TYPES.find(type=>type.toLowerCase()===name)||'';
+}
+function countPlayed(rows){
+  const unique=new Map();
+  rows.forEach(row=>{
+    const date=parseDate(row.date),type=metaType(row.type);
+    if(!date||!row.player||!type)return;
+    const key=[date.getFullYear(),date.getMonth(),date.getDate(),row.player.trim().toLowerCase()].join('|');
+    unique.set(key,type);
+  });
+  return META_TYPES.map(type=>({type,count:[...unique.values()].filter(value=>value===type).length}))
+    .sort((a,b)=>b.count-a.count||META_TYPES.indexOf(a.type)-META_TYPES.indexOf(b.type));
+}
 function renderAttendance(rows){
-  const host=document.querySelector('#weeklyAttendance');
-  const clean=rows.map(r=>({...r,type:String(r.type).toLowerCase()==='electric'?'Lightning':r.type}));
-  const weeks=[...new Set(clean.map(r=>r.date))].sort((a,b)=>parseDate(b)-parseDate(a));
-  if(!weeks.length){host.innerHTML='<p class="empty">No weekly attendance recorded yet.</p>';return;}
-  host.innerHTML='<label for="attendanceWeek">Event date</label> <select id="attendanceWeek">'+weeks.map(d=>'<option value="'+esc(d)+'">'+esc(prettyDate(d))+'</option>').join('')+'</select><div id="weeklyPlayers"></div><div id="popularTypes"></div>';
-  const update=()=>{
-    const selected=clean.filter(r=>r.date===document.querySelector('#attendanceWeek').value);
-    const unique=[...new Map(selected.map(r=>[r.player.toLowerCase(),r])).values()];
-    document.querySelector('#weeklyPlayers').innerHTML='<p>'+unique.length+' players</p><div class="record-list">'+unique.map(r=>'<div class="record"><span></span><strong>'+esc(r.player)+'</strong><em>'+esc(r.type)+'</em></div>').join('')+'</div>';
-    const counts=[...new Set(unique.map(r=>r.type))].map(type=>({type,count:unique.filter(r=>r.type===type).length})).sort((a,b)=>b.count-a.count||a.type.localeCompare(b.type));
-    document.querySelector('#popularTypes').innerHTML='<h3>Most-played deck types</h3>'+counts.map(r=>'<div class="meta-row"><span>'+esc(r.type)+'</span><meter min="0" max="'+unique.length+'" value="'+r.count+'">'+r.count+'</meter><strong>'+r.count+' · '+Math.round(r.count/unique.length*100)+'%</strong></div>').join('');
-  };
-  document.querySelector('#attendanceWeek').addEventListener('change',update); update();
+  document.querySelector('#typeRecords').innerHTML='<table class="meta-table"><thead><tr><th scope="col">Place</th><th scope="col">Type</th><th scope="col"># Played</th></tr></thead><tbody>'+
+    countPlayed(rows).map((row,index)=>'<tr><td>'+(index+1)+'</td><td>'+esc(row.type)+'</td><td>'+row.count+'</td></tr>').join('')+'</tbody></table>';
 }
 async function loadAttendance(){
   try{
     const response=await fetch(PLAYERS_CSV_URL,{cache:'no-store'});
     if(!response.ok)throw new Error('Attendance unavailable');
-    renderAttendance(parseCSV(await response.text()));
-  }catch(error){document.querySelector('#weeklyAttendance').innerHTML='<p class="empty">Weekly attendance is temporarily unavailable.</p>';console.error(error);}
+    const text=await response.text();
+    if(/^\s*</.test(text))throw new Error('Attendance feed did not return CSV');
+    renderAttendance(parseCSV(text));
+  }catch(error){document.querySelector('#typeRecords').innerHTML='<p class="empty">Deck-type play counts are temporarily unavailable.</p>';console.error(error);}
 }
 loadAttendance();
