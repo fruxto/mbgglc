@@ -1,7 +1,7 @@
 const slug=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-function parseCSV(text){
+function parseCSV(text,raw=false){
   const rows=[]; let row=[], cell='', quoted=false;
   for(let i=0;i<text.length;i++){
     const c=text[i], n=text[i+1];
@@ -14,6 +14,7 @@ function parseCSV(text){
     } else cell+=c;
   }
   row.push(cell); if(row.some(v=>v.trim())) rows.push(row);
+  if(raw)return rows;
   if(rows.length<2) return [];
   const h=rows[0].map(x=>x.trim().toLowerCase());
   const find=(...names)=>names.map(n=>h.indexOf(n)).find(i=>i>=0) ?? -1;
@@ -144,17 +145,25 @@ function countPlayed(rows){
   return META_TYPES.map(type=>({type,count:[...unique.values()].filter(value=>value===type).length}))
     .sort((a,b)=>b.count-a.count||META_TYPES.indexOf(a.type)-META_TYPES.indexOf(b.type));
 }
-function renderAttendance(rows){
+function renderAttendance(rows,totals=null){
   document.querySelector('#typeRecords').innerHTML='<table class="meta-table"><thead><tr><th scope="col">Place</th><th scope="col">Type</th><th scope="col"># Played</th></tr></thead><tbody>'+
-    countPlayed(rows).map((row,index)=>'<tr><td>'+(index+1)+'</td><td>'+esc(row.type)+'</td><td>'+row.count+'</td></tr>').join('')+'</tbody></table>';
+    (totals||countPlayed(rows)).map((row,index)=>'<tr><td>'+(index+1)+'</td><td>'+esc(row.type)+'</td><td>'+row.count+'</td></tr>').join('')+'</tbody></table>';
 }
 async function loadAttendance(){
   try{
-    const response=await fetch(PLAYERS_CSV_URL,{cache:'no-store'});
+    const response=await fetch(SHEET_CSV_URL,{cache:'no-store'});
     if(!response.ok)throw new Error('Attendance unavailable');
     const text=await response.text();
     if(/^\s*</.test(text))throw new Error('Attendance feed did not return CSV');
-    renderAttendance(parseCSV(text));
+    const grid=parseCSV(text,true);
+    const headers=(grid[0]||[]).map(value=>value.trim().toLowerCase());
+    const totals=META_TYPES.map(type=>{
+      const column=headers.indexOf('played '+type.toLowerCase());
+      const value=grid[1]?.[column];
+      if(column<0||value===undefined||value.trim()===''||!Number.isFinite(Number(value)))throw new Error('Published play totals not ready');
+      return {type,count:Number(value)};
+    }).sort((a,b)=>b.count-a.count||META_TYPES.indexOf(a.type)-META_TYPES.indexOf(b.type));
+    renderAttendance([],totals);
   }catch(error){document.querySelector('#typeRecords').innerHTML='<p class="empty">Deck-type play counts are temporarily unavailable.</p>';console.error(error);}
 }
 loadAttendance();
