@@ -56,3 +56,6 @@ section:has(> .collapsible-title > .collapse-toggle[aria-expanded="false"])+sect
 
 /* Keep the Badge Board close to its neighboring sections. */
 .events{padding-bottom:28px}#badges>.section-title{margin-top:28px}.league-info{margin-top:28px}.league-info>.section-title{margin-top:0}
+
+/* Match the compact spacing before standings and type statistics. */
+.split{margin-top:28px;padding-top:28px}
